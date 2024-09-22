@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('picture.jpg');
+            background-size: cover;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #003d82;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #0056b3;
+            border-radius: 4px;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Grade Calculator</h1>
+        <form onsubmit="calculateGrades(); return false;">
+            <label for="absences">Number of Absences:</label>
+            <input type="text" id="absences" placeholder="Enter number of absences (0-10)" required>
+
+            <label for="prelimExamScore">Prelim Exam Grade:</label>
+            <input type="text" id="prelimExamScore" placeholder="Enter Prelim Exam Grade (0-100)" required>
+
+            <label for="quizzesScore">Quizzes Grade:</label>
+            <input type="text" id="quizzesScore" placeholder="Enter Quizzes Grade (0-100)" required>
+
+            <label for="requirementsScore">Requirements Grade:</label>
+            <input type="text" id="requirementsScore" placeholder="Enter Requirements Grade (0-100)" required>
+
+            <label for="recitationScore">Recitation Grade:</label>
+            <input type="text" id="recitationScore" placeholder="Enter Recitation Grade (0-100)" required>
+
+            <button type="submit" class="button">Calculate</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function calculateGrades() {
+            const absences = document.getElementById('absences').value.trim();
+            const prelimExamScore = document.getElementById('prelimExamScore').value.trim();
+            const quizzesScore = document.getElementById('quizzesScore').value.trim();
+            const requirementsScore = document.getElementById('requirementsScore').value.trim();
+            const recitationScore = document.getElementById('recitationScore').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            // Function to validate if input is a valid number and within the specified range
+            function isValidGrade(value, min = 0, max = 100) {
+                const number = parseFloat(value);
+                return !isNaN(number) && number >= min && number <= max && !value.includes('e'); // Ensure it's not scientific notation
+            }
+
+            // Validate each input
+            if (!isValidGrade(absences, 0, 10)) {
+                resultDiv.innerHTML = "Error: Absences must be a number between 0 and 10 and not in scientific notation.";
+                return;
+            }
+            if (!isValidGrade(prelimExamScore)) {
+                resultDiv.innerHTML = "Error: Prelim Exam Grade must be a number between 0 and 100 and not in scientific notation.";
+                return;
+            }
+            if (!isValidGrade(quizzesScore)) {
+                resultDiv.innerHTML = "Error: Quizzes Grade must be a number between 0 and 100 and not in scientific notation.";
+                return;
+            }
+            if (!isValidGrade(requirementsScore)) {
+                resultDiv.innerHTML = "Error: Requirements Grade must be a number between 0 and 100 and not in scientific notation.";
+                return;
+            }
+            if (!isValidGrade(recitationScore)) {
+                resultDiv.innerHTML = "Error: Recitation Grade must be a number between 0 and 100 and not in scientific notation.";
+                return;
+            }
+
+            // Convert absences to integer
+            const absencesInt = parseInt(absences);
+
+            // Check if the student failed due to excessive absences
+            if (absencesInt >= 4) {
+                resultDiv.innerHTML = "FAILED due to excessive absences.";
+                return;
+            }
+
+            // Calculate attendance score
+            const attendanceScore = 100 - (10 * absencesInt);
+            
+            // Calculate class standing
+            const classStanding = (0.4 * quizzesScore) + (0.3 * requirementsScore) + (0.3 * recitationScore);
+            
+            // Calculate prelim grade
+            const prelimGrade = (0.6 * prelimExamScore) + (0.1 * attendanceScore) + (0.3 * classStanding);
+
+            let output = `Preliminary Grade: ${prelimGrade.toFixed(2)}<br>`;
+            output += `Status: `;
+
+            if (prelimGrade < 75) {
+                output += "Passing this course will be challenging. Keep striving!";
+            } else {
+                output += "You are on track to pass!";
+            }
+
+            const requiredMidterm = (75 - (0.2 * prelimGrade)) / 0.8;
+            const requiredFinal = requiredMidterm; // Same for midterm and final
+
+            const requiredMidtermDean = (90 - (0.2 * prelimGrade)) / 0.8;
+            const requiredFinalDean = requiredMidtermDean; // Same for midterm and final
+
+            output += `<br>To pass with 75%, you need a Midterm score of ${requiredMidterm.toFixed(2)} and a Final score of ${requiredFinal.toFixed(2)}.`;
+            output += `<br>To achieve 90%, you need a Midterm score of ${requiredMidtermDean.toFixed(2)} and a Final score of ${requiredFinalDean.toFixed(2)}.`;
+
+            // Dean's List eligibility
+            if (prelimGrade >= 90) {
+                output += `<br>Congratulations! You qualify for the Dean's List!`;
+            } else if (prelimGrade < 60) {
+                output += `<br>With a Preliminary score below 60, achieving Dean's List status is impossible.`;
+            } else if (prelimGrade < 70) {
+                output += `<br>Unfortunately, you are not eligible for Dean's List.`;
+            } else if (prelimGrade < 75) {
+                output += `<br>You need a higher score to qualify for Dean's List.`;
+            } else {
+                output += `<br>Keep it up! You might still qualify for Dean's List with great scores in Midterms and Finals!`;
+            }
+
+            // Joke for very low scores
+            if (prelimExamScore < 20) {
+                output += `<br>Joke: Why don't students ever play hide and seek? Because good luck hiding when you have grades like that!`;
+            }
+
+            resultDiv.innerHTML = output; // Display the result
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
